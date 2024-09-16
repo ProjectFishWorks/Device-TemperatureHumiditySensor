@@ -1,2 +1,2 @@
 # Device-TemperatureHumiditySensor
-Monitor sensors for Water temperature, and lighting canopy humidity/temperature
+Monitor sensors for Water temperature, and canopy lighting humidity/temperature
