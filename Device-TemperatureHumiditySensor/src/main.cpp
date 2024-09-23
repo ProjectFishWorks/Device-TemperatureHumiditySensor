@@ -4,6 +4,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <SPI.h>
+#include <NodeControllerCore.h>
 
 // ---------------------------------------------------------put global variables here:---------------------------------------------------------
 
@@ -19,6 +20,9 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature sensor
 DallasTemperature WaterTempSensors(&oneWire);
 
+// Node controller core object
+NodeControllerCore core;
+
 bool enableHeater = false;
 uint8_t loopCnt = 0;
 float canopyTemp;
@@ -33,6 +37,9 @@ void chkWaterTempSensors();
 //------------------------------------------------------- put your setup code here, to run once:------------------------------------------------------
 void setup()
 {
+  // Create the node controller core object
+  core = NodeControllerCore();
+
   WaterTempSensors.begin();
   Serial.begin(115200);
   pinMode(2, OUTPUT);
