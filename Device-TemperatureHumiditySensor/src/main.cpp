@@ -8,11 +8,16 @@
 
 // ---------------------------------------------------------put global variables here:---------------------------------------------------------
 
+// USE int FOR I2C PIN DEFINITIONS
+int I2C_SDA = 3;  
+int I2C_SCL = 2;
+
 // Define the SHT30-D sensor object
 Adafruit_SHT31 sht30D = Adafruit_SHT31();
 
 // Data wire is conntec to the Arduino digital pin 4
 #define ONE_WIRE_BUS 4
+#define TEMPERATURE_PRECISION 9
 
 // Setup a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(ONE_WIRE_BUS);
@@ -20,13 +25,18 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature sensor
 DallasTemperature WaterTempSensors(&oneWire);
 
+// arrays to hold device addresses
+DeviceAddress tankThermometer, sumpThermometer;
+
 // Node controller core object
-NodeControllerCore core;
+//NodeControllerCore core;
 
 bool enableHeater = false;
 uint8_t loopCnt = 0;
-float canopyTemp;
-float canopyHum;
+float canopyTemp = 0;
+float canopyHum = 0;
+float tankTemp = 0;
+float sumpTemp = 0;
 
 // ---------------------------------------------------------put function declarations here:--------------------------------------------------------
 
@@ -34,17 +44,26 @@ void chkTempHum();
 
 void chkWaterTempSensors();
 
+void printAddress(DeviceAddress deviceAddress);
+
+void printData(DeviceAddress deviceAddress);
+
+void printTemperature(DeviceAddress deviceAddress);
+
+void printResolution(DeviceAddress deviceAddress);
+
+
+
 //------------------------------------------------------- put your setup code here, to run once:------------------------------------------------------
 void setup()
 {
   // Create the node controller core object
-  core = NodeControllerCore();
+  //core = NodeControllerCore();
 
+  
+  Wire.begin(I2C_SDA, I2C_SCL);
   WaterTempSensors.begin();
   Serial.begin(115200);
-  pinMode(2, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(5, OUTPUT);
 
   while (!Serial)
   {
@@ -67,6 +86,55 @@ void setup()
       Serial.println("DISABLED");
     }
   }
+
+ // locate devices on the bus
+  Serial.print("Locating devices...");
+  Serial.print("Found ");
+  Serial.print(WaterTempSensors.getDeviceCount(), DEC);
+  Serial.println(" devices.");
+
+  // report parasite power requirements
+  Serial.print("Parasite power is: "); 
+  if (WaterTempSensors.isParasitePowerMode()) Serial.println("ON");
+  else Serial.println("OFF");
+
+  // Assign address manually. The addresses below will beed to be changed
+  // to valid device addresses on your bus. Device address can be retrieved
+  // by using either oneWire.search(deviceAddress) or individually via
+  // WaterTempSensors.getAddress(deviceAddress, index)
+  //tankThermometer = { 0x28, 0x1D, 0x39, 0x31, 0x2, 0x0, 0x0, 0xF0 };
+  //sumpThermometer   = { 0x28, 0x3F, 0x1C, 0x31, 0x2, 0x0, 0x0, 0x2 };
+
+  // Search for devices on the bus and assign based on an index. Ideally,
+  // you would do this to initially discover addresses on the bus and then 
+  // use those addresses and manually assign them (see above) once you know 
+  // the devices on your bus (and assuming they don't change).
+  // 
+  // method 1: by index
+  if (!WaterTempSensors.getAddress(tankThermometer, 0)) Serial.println("Unable to find address for Device 0"); 
+  if (!WaterTempSensors.getAddress(sumpThermometer, 1)) Serial.println("Unable to find address for Device 1"); 
+
+  // show the addresses we found on the bus
+  Serial.print("Device 0 Address: ");
+  printAddress(tankThermometer);
+  Serial.println();
+
+  Serial.print("Device 1 Address: ");
+  printAddress(sumpThermometer);
+  Serial.println();
+
+  // set the resolution to 9 bit per device
+  WaterTempSensors.setResolution(tankThermometer, TEMPERATURE_PRECISION);
+  WaterTempSensors.setResolution(sumpThermometer, TEMPERATURE_PRECISION);
+
+  Serial.print("Device 0 Resolution: ");
+  Serial.print(WaterTempSensors.getResolution(tankThermometer), DEC); 
+  Serial.println();
+
+  Serial.print("Device 1 Resolution: ");
+  Serial.print(WaterTempSensors.getResolution(sumpThermometer), DEC); 
+  Serial.println();
+  
 }
 
 //---------------------------------------------------- put your main code here, to run repeatedly:----------------------------------------------------
@@ -74,7 +142,17 @@ void loop()
 {
   chkTempHum();
   chkWaterTempSensors();
+    // call WaterTempSensors.requestTemperatures() to issue a global temperature 
+  // request to all devices on the bus
+  Serial.print("Requesting temperatures...");
+  WaterTempSensors.requestTemperatures();
+  Serial.println("DONE");
+
+  // print the device information
+  //printData(tankThermometer);
+  //printData(sumpThermometer);
 }
+
 
 //--------------------------------------------------------- put function definitions here: ---------------------------------------------------------
 
@@ -84,7 +162,7 @@ void loop()
   Designed specifically to work with the SHT31-D sensor from Adafruit
   ----> https://www.adafruit.com/products/2857
 
-  These sensors use I2C to communicate, 2 pins are required to
+  These WaterTempSensors use I2C to communicate, 2 pins are required to
   interface
  ****************************************************/
 // #include <Arduino.h>
@@ -124,8 +202,8 @@ void chkTempHum()
 {
   canopyTemp = sht30D.readTemperature();
   canopyHum = sht30D.readHumidity();
-  if (!isnan(canopyTemp))
-  { // check if 'is not a number'
+  if (! isnan(canopyTemp))  // check if 'is not a number'
+  { 
     Serial.print("Temp *C = ");
     Serial.print(canopyTemp);
     Serial.print("\t\t");
@@ -135,8 +213,8 @@ void chkTempHum()
     Serial.println("Failed to read temperature");
   }
 
-  if (!isnan(canopyHum))
-  { // check if 'is not a number'
+  if (!isnan(canopyHum))  // check if 'is not a number'
+  {
     Serial.print("Hum. % = ");
     Serial.println(canopyHum);
   }
@@ -144,6 +222,7 @@ void chkTempHum()
   {
     Serial.println("Failed to read humidity");
   }
+
 
   delay(1000);
 
@@ -181,19 +260,20 @@ void chkTempHum()
 // OneWire oneWire(ONE_WIRE_BUS);
 
 // Pass our oneWire reference to Dallas Temperature sensor
-// DallasTemperature sensors(&oneWire);
+// DallasTemperature WaterTempSensors(&oneWire);
 
 // void setup(void)
 //{
 //  Start serial communication for debugging purposes
 //  Serial.begin(9600);
 // Start up the library
-//  sensors.begin();
+//  WaterTempSensors.begin();
 //}
 
+ 
 void chkWaterTempSensors()
 {
-  // Call sensors.requestTemperatures() to issue a global temperature and Requests to all devices on the bus
+  // Call WaterTempSensors.requestTemperatures() to issue a global temperature and Requests to all devices on the bus
   WaterTempSensors.requestTemperatures();
 
   Serial.print("Celsius temperature: ");
@@ -203,3 +283,45 @@ void chkWaterTempSensors()
   Serial.println(WaterTempSensors.getTempFByIndex(0));
   delay(1000);
 }
+
+
+// function to print a device address
+void printAddress(DeviceAddress deviceAddress)
+{
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    // zero pad the address if necessary
+    if (deviceAddress[i] < 16) Serial.print("0");
+    Serial.print(deviceAddress[i], HEX);
+  }
+}
+
+// function to print the temperature for a device
+void printTemperature(DeviceAddress deviceAddress)
+{
+  float tempC = WaterTempSensors.getTempC(deviceAddress);
+  Serial.print("Temp C: ");
+  Serial.print(tempC);
+  Serial.print(" Temp F: ");
+  Serial.print(DallasTemperature::toFahrenheit(tempC));
+}
+
+// function to print a device's resolution
+void printResolution(DeviceAddress deviceAddress)
+{
+  Serial.print("Resolution: ");
+  Serial.print(WaterTempSensors.getResolution(deviceAddress));
+  Serial.println();    
+}
+
+// main function to print information about a device
+void printData(DeviceAddress deviceAddress)
+{
+  Serial.print("Device Address: ");
+  printAddress(deviceAddress);
+  Serial.print(" ");
+  printTemperature(deviceAddress);
+  Serial.println();
+}
+
+
