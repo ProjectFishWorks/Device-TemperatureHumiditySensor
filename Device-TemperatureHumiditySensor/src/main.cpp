@@ -33,28 +33,42 @@ DallasTemperature WaterTempSensors(&oneWire);
 // Node controller core object
 NodeControllerCore core;
 
-#define NODE_ID 0xA2
+// ------------------------------  Mesages and their case statement variables  ------------------------------
+#define NODE_ID 0xA2                                // Node ID in decimal is 162
 
-#define CANOPY_TEMP_MESSAGE_ID 0x0
-#define CANOPY_TEMP_ALERT_MESSAGE_ID 0x1
-#define CANOPY_TEMP_ALARM_LOW_MESSAGE_ID 0x2
-#define CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID 0x3
+#define CANOPY_TEMP_MESSAGE_ID 0xA0                  // ID in decimal is 0
+#define CANOPY_TEMP_ALARM_MESSAGE_ID 0xA1            // ID in decimal is 1
+bool canopyTempAlarmOnOff;
+#define CANOPY_TEMP_ALARM_LOW_MESSAGE_ID 0xA2        // ID in decimal is 2
+int canopyTempAlarmLow;
+#define CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID 0xA3       // ID in decimal is 3
+int canopyTempAlarmHigh;
 
-#define CANOPY_HUMIDITY_MESSAGE_ID 0x4
-#define CANOPY_HUMIDITY_ALERT_MESSAGE_ID 0x5
-#define CANOPY_HUMIDITY_ALARM_LOW_MESSAGE_ID 0x6
-#define CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID 0x7
+#define CANOPY_HUMIDITY_MESSAGE_ID 0xA4              // ID in decimal is 4
+#define CANOPY_HUMIDITY_ALARM_MESSAGE_ID 0xA5        // ID in decimal is 5
+bool canopyHumidityAlarmOnOff;
+#define CANOPY_HUMIDITY_ALARM_LOW_MESSAGE_ID 0xA6    // ID in decimal is 6
+int canopyHumidityAlarmLow;
+#define CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID 0xA7   // ID in decimal is 7 
+int canopyHumidityAlarmHigh;
 
-#define TANK_TEMP_MESSAGE_ID 0x8
-#define TANK_TEMP_ALERT_MESSAGE_ID 0x9
-#define TANK_TEMP_ALARM_LOW_MESSAGE_ID 0xA
-#define TANK_TEMP_ALARM_HIGH_MESSAGE_ID 0xB
+#define TANK_TEMP_MESSAGE_ID 0xA8                    // ID in decimal is 8
+#define TANK_TEMP_ALARM_MESSAGE_ID 0xA9              // ID in decimal is 9
+bool tankTempAlarmOnOff;
+#define TANK_TEMP_ALARM_LOW_MESSAGE_ID 0xAA          // ID in decimal is 10
+int tankTempAlarmLow;
+#define TANK_TEMP_ALARM_HIGH_MESSAGE_ID 0xAB         // ID in decimal is 11
+int tankTempAlarmHigh;
 
-#define SUMP_TEMP_MESSAGE_ID 0xC
-#define SUMP_TEMP_ALERT_MESSAGE_ID 0xD
-#define SUMP_TEMP_ALARM_LOW_MESSAGE_ID 0xE
-#define SUMP_TEMP_ALARM_HIGH_MESSAGE_ID 0xF
+#define SUMP_TEMP_MESSAGE_ID 0xC                    // ID in decimal is 12  
+#define SUMP_TEMP_ALARM_MESSAGE_ID 0xAD              // ID in decimal is 13
+bool sumpTempAlarmOnOff;
+#define SUMP_TEMP_ALARM_LOW_MESSAGE_ID 0xAE          // ID in decimal is 14
+int sumpTempAlarmLow;
+#define SUMP_TEMP_ALARM_HIGH_MESSAGE_ID 0xAF         // ID in decimal is 15
+int sumpTempAlarmHigh;
 
+// ------------------------------  Variables for the temperature and humidity values to be stored in  ------------------------------
 
 float canopyTemp = 0;
 float canopyHum = 0;
@@ -65,8 +79,9 @@ int sumpThermometer = 1;
 
 // ---------------------------------------------------------put function declarations here:--------------------------------------------------------
 
-// Callback function for received messages from the CAN bus
+// What to do with received messages from the CAN bus
 void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data);
+
 
 void SendTempHumMessage(void *parameters);
 
@@ -132,58 +147,68 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
     Serial.println("Message received to self");
     // Check the message ID for the LED control messages
     switch (messageID)
-    {/*
+    {
       // ---------------------Demo override control messages-------------------------
-    case MANUAL_OVERRIDE_SWITCH_MESSAGE_ID:
-      ManualLEDControlOverrideSwitch = data;
-      Serial.println("Manual LED Control Override Switch set to " + String(data));
+    case CANOPY_TEMP_ALARM_MESSAGE_ID:
+      canopyTempAlarmOnOff = data;
+      Serial.println("Canopy Temperture alarm is " + String(data));
       break;
 
-    case OVERRIDE_WHITE_INTENSITY_MESSAGE_ID:
-      OverrideWhiteIntensity = data;
+    case CANOPY_TEMP_ALARM_LOW_MESSAGE_ID:
+      canopyTempAlarmLow = data;
+      Serial.println("Canopy Temperture alarm low is " + String(data));
       break;
 
-    case OVERRIDE_BLUE_INTENSITY_MESSAGE_ID:
-      OverrideBlueIntensity = data;
+    case CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID:
+      canopyTempAlarmHigh = data;
+      Serial.println("Canopy Temperture alarm high is " + String(data));
       break;
 
-      //  -----------------Demo control messages--------------------------------
-
-    case DAWN_MESSAGE_ID:
-      dawnBlueOnlyDuration = data;
-      Serial.println("Dawn duration set to " + String(data));
+    case CANOPY_HUMIDITY_ALARM_MESSAGE_ID:  
+      canopyHumidityAlarmOnOff = data;
+      Serial.println("Canopy Humidity alarm is " + String(data));
       break;
 
-    case DUSK_MESSAGE_ID:
-      duskBlueOnlyDuration = data;
-      Serial.println("Dusk duration set to " + String(data));
+    case CANOPY_HUMIDITY_ALARM_LOW_MESSAGE_ID:  
+      canopyHumidityAlarmLow = data;
+      Serial.println("Canopy Humidity alarm low is " + String(data));
       break;
 
-    case SUNRISE_MESSAGE_ID:
-      sunriseFadeDuration = data;
-      Serial.println("Sunrise duration set to " + String(data));
+    case CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID:
+      canopyHumidityAlarmHigh = data;
+      Serial.println("Canopy Humidity alarm high is " + String(data));
       break;
 
-    case SUNSET_MESSAGE_ID:
-      sunsetFadeDuration = data;
-      Serial.println("Sunset duration set to " + String(data));
+    case TANK_TEMP_ALARM_MESSAGE_ID:
+      tankTempAlarmOnOff = data;
+      Serial.println("Tank Temperture alarm is " + String(data));
       break;
 
-    case HIGH_NOON_MESSAGE_ID:
-      highNoonDuration = data;
-      Serial.println("High Noon duration set to " + String(data));
+    case TANK_TEMP_ALARM_LOW_MESSAGE_ID:
+      tankTempAlarmLow = data;
+      Serial.println("The low Temperture for the Tank alarm low is " + String(data));
       break;
 
-    case NIGHT_TIME_MESSAGE_ID:
-      nightTime = data;
-      Serial.println("Night Time duration set to " + String(data));
+    case TANK_TEMP_ALARM_HIGH_MESSAGE_ID: 
+      tankTempAlarmHigh = data;
+      Serial.println("The high Temperture for the Tank alarm is = " + String(data));
       break;
 
-    case BLUE_ONLY_MAX_INTENSITY_MESSAGE_ID:
-      blueOnlyMaxIntensity = data;
-      Serial.println("Blue Only Max Intensity set to " + String(data));
+    case SUMP_TEMP_ALARM_MESSAGE_ID:  
+      sumpTempAlarmOnOff = data;
+      Serial.println("Sump Temperture alarm is " + String(data));
       break;
-*/
+
+    case SUMP_TEMP_ALARM_LOW_MESSAGE_ID:  
+      sumpTempAlarmLow = data;
+      Serial.println("The low Temperture for the sump alarm = " + String(data));
+      break;
+
+    case SUMP_TEMP_ALARM_HIGH_MESSAGE_ID: 
+      sumpTempAlarmHigh = data;
+      Serial.println("The high Temperture for the Sump alarm = " + String(data));
+      break;
+
     default:
       break;
     }
