@@ -10,8 +10,8 @@
 
 #define debuging
 
-int wait = 2000; // 2 seconds
-int sendMessageDelay = 100; // 1/10 second
+int messageGap = 5000; // 2 seconds
+int sendMessageDelay = 1000; // 1/10 second
 
 // USE int FOR I2C PIN DEFINITIONS
 int I2C_SDA = 3;
@@ -36,36 +36,36 @@ NodeControllerCore core;
 // ------------------------------  Mesages and their case statement variables  ------------------------------
 #define NODE_ID 0xA2                                // Node ID in decimal is 162
 
-#define CANOPY_TEMP_MESSAGE_ID 0xA0                  // ID in decimal is 0
-#define CANOPY_TEMP_ALARM_MESSAGE_ID 0xA1            // ID in decimal is 1
+#define CANOPY_TEMP_MESSAGE_ID 2560                  // ID in decimal is 0
+#define CANOPY_TEMP_ALARM_MESSAGE_ID 2561            // ID in decimal is 1
 bool canopyTempAlarmOnOff;
-#define CANOPY_TEMP_ALARM_LOW_MESSAGE_ID 0xA2        // ID in decimal is 2
+#define CANOPY_TEMP_ALARM_LOW_MESSAGE_ID 2562        // ID in decimal is 2
 int canopyTempAlarmLow;
-#define CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID 0xA3       // ID in decimal is 3
+#define CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID 2563       // ID in decimal is 3
 int canopyTempAlarmHigh;
 
-#define CANOPY_HUMIDITY_MESSAGE_ID 0xA4              // ID in decimal is 4
-#define CANOPY_HUMIDITY_ALARM_MESSAGE_ID 0xA5        // ID in decimal is 5
+#define CANOPY_HUMIDITY_MESSAGE_ID 2564              // ID in decimal is 4
+#define CANOPY_HUMIDITY_ALARM_MESSAGE_ID 2565        // ID in decimal is 5
 bool canopyHumidityAlarmOnOff;
-#define CANOPY_HUMIDITY_ALARM_LOW_MESSAGE_ID 0xA6    // ID in decimal is 6
+#define CANOPY_HUMIDITY_ALARM_LOW_MESSAGE_ID 2566    // ID in decimal is 6
 int canopyHumidityAlarmLow;
-#define CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID 0xA7   // ID in decimal is 7 
+#define CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID 2567   // ID in decimal is 7 
 int canopyHumidityAlarmHigh;
 
-#define TANK_TEMP_MESSAGE_ID 0xA8                    // ID in decimal is 8
-#define TANK_TEMP_ALARM_MESSAGE_ID 0xA9              // ID in decimal is 9
+#define TANK_TEMP_MESSAGE_ID 2568                    // ID in decimal is 8
+#define TANK_TEMP_ALARM_MESSAGE_ID 2569              // ID in decimal is 9
 bool tankTempAlarmOnOff;
-#define TANK_TEMP_ALARM_LOW_MESSAGE_ID 0xAA          // ID in decimal is 10
+#define TANK_TEMP_ALARM_LOW_MESSAGE_ID 2570          // ID in decimal is 10
 int tankTempAlarmLow;
-#define TANK_TEMP_ALARM_HIGH_MESSAGE_ID 0xAB         // ID in decimal is 11
+#define TANK_TEMP_ALARM_HIGH_MESSAGE_ID 2571         // ID in decimal is 11
 int tankTempAlarmHigh;
 
-#define SUMP_TEMP_MESSAGE_ID 0xC                    // ID in decimal is 12  
-#define SUMP_TEMP_ALARM_MESSAGE_ID 0xAD              // ID in decimal is 13
+#define SUMP_TEMP_MESSAGE_ID 2562                    // ID in decimal is 12  
+#define SUMP_TEMP_ALARM_MESSAGE_ID 2573              // ID in decimal is 13
 bool sumpTempAlarmOnOff;
-#define SUMP_TEMP_ALARM_LOW_MESSAGE_ID 0xAE          // ID in decimal is 14
+#define SUMP_TEMP_ALARM_LOW_MESSAGE_ID 2574          // ID in decimal is 14
 int sumpTempAlarmLow;
-#define SUMP_TEMP_ALARM_HIGH_MESSAGE_ID 0xAF         // ID in decimal is 15
+#define SUMP_TEMP_ALARM_HIGH_MESSAGE_ID 2575         // ID in decimal is 15
 int sumpTempAlarmHigh;
 
 // ------------------------------  Variables for the temperature and humidity values to be stored in  ------------------------------
@@ -81,7 +81,6 @@ int sumpThermometer = 1;
 
 // What to do with received messages from the CAN bus
 void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data);
-
 
 void SendTempHumMessage(void *parameters);
 
@@ -222,16 +221,16 @@ void SendTempHumMessage(void *parameters)
   
   while (1)
   {
-    uint64_t CanopyTemp;
-    uint64_t CanopyHum;
+    float CanopyTemp;
+    float CanopyHum;
     CanopyTemp  = canopyTemp;
     CanopyHum = canopyHum;
     core.sendMessage(CANOPY_TEMP_MESSAGE_ID, &CanopyTemp); // Send the Canopy temperature
     delay(sendMessageDelay);
     core.sendMessage(CANOPY_HUMIDITY_MESSAGE_ID, &CanopyHum); // Send the Canopy humidity
     delay(sendMessageDelay);
-    uint64_t TankTemp;
-    uint64_t SumpTemp;
+    float TankTemp;
+    float SumpTemp;
     TankTemp = tankTemp;
     SumpTemp = sumpTemp;
     core.sendMessage(TANK_TEMP_MESSAGE_ID, &TankTemp); // Send the tank temperature
@@ -285,7 +284,7 @@ void chkTempHum()
   }
 #endif
 
-  delay(wait);
+  delay(messageGap);
 }
 
 /*
@@ -320,5 +319,5 @@ void chkWaterTempSensors()
   Serial.print("");
   #endif
 
-  delay(wait);
+  delay(messageGap);
 }
