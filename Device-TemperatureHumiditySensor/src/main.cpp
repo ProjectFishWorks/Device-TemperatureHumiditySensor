@@ -60,7 +60,7 @@ int tankTempAlarmLow;
 #define TANK_TEMP_ALARM_HIGH_MESSAGE_ID 2571         // ID in decimal is 11
 int tankTempAlarmHigh;
 
-#define SUMP_TEMP_MESSAGE_ID 2562                    // ID in decimal is 12  
+#define SUMP_TEMP_MESSAGE_ID 2572                    // ID in decimal is 12  
 #define SUMP_TEMP_ALARM_MESSAGE_ID 2573              // ID in decimal is 13
 bool sumpTempAlarmOnOff;
 #define SUMP_TEMP_ALARM_LOW_MESSAGE_ID 2574          // ID in decimal is 14
@@ -237,6 +237,13 @@ void SendTempHumMessage(void *parameters)
     delay(sendMessageDelay);
     core.sendMessage(SUMP_TEMP_MESSAGE_ID, &SumpTemp); // Send the sump temperature
     delay(sendMessageDelay);
+    
+    #ifdef debuging
+    Serial.println("Sump Temperture = " + String(SumpTemp));
+    Serial.println("Tank Temperture = " + String(TankTemp));
+    Serial.println("Canopy Temperture = " + String(CanopyTemp));
+    Serial.println("Canopy Humidity = " + String(CanopyHum));
+    #endif
     }
   }
 
