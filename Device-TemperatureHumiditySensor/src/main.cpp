@@ -71,6 +71,10 @@ int sumpTempAlarmHigh = 30;
 
 #define ALARM_MESSAGE_ID 901 // ID in hex is 0x385
 
+uint8_t hasSentCanTempAlarm = 0;
+uint8_t hasSentCanHumAlarm = 0;
+uint8_t hasSentTankTempAlarm = 0;
+uint8_t hasSentSumpTempAlarm = 0;
 uint8_t hasSentAlarm = 0;
 uint8_t hasSentNoAlarm = 0;
 uint64_t errorData1 = 1;
@@ -199,6 +203,8 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
     case CANOPY_TEMP_ALARM_LOW_MESSAGE_ID:
       canopyTempAlarmLow = data;
       Serial.println("Canopy Temperture alarm low is " + String(data));
+      hasSentCanTempAlarm = 0;
+      
       break;
 
     case CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID:
