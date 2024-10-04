@@ -79,8 +79,6 @@ uint8_t hasSentTankTempAlarm = 0;
 uint8_t hasSentNoTankTempAlarm = 0;
 uint8_t hasSentSumpTempAlarm = 0;
 uint8_t hasSentNoSumpTempAlarm = 0;
-uint8_t hasSentAlarm = 0;
-uint8_t hasSentNoAlarm = 0;
 uint64_t errorData1 = 1;
 uint64_t errorData0 = 0;
 
@@ -208,14 +206,14 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       canopyTempAlarmLow = data;
       Serial.println("Canopy Temperture alarm low is " + String(data));
       hasSentCanTempAlarm = 0;
-      hasSentNoAlarm = 0;
+      hasSentNoCanTempAlarm = 0;
       break;
 
     case CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID:
       canopyTempAlarmHigh = data;
       Serial.println("Canopy Temperture alarm high is " + String(data));
       hasSentCanTempAlarm = 0;
-      hasSentNoAlarm = 0;
+      hasSentNoCanTempAlarm = 0;
       break;
 
     case CANOPY_HUMIDITY_ALARM_MESSAGE_ID:
@@ -227,14 +225,14 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       canopyHumidityAlarmLow = data;
       Serial.println("Canopy Humidity alarm low is " + String(data));
       hasSentCanHumAlarm = 0;
-      hasSentNoAlarm = 0;
+      hasSentNoCanHumAlarm = 0;
       break;
 
     case CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID:
       canopyHumidityAlarmHigh = data;
       Serial.println("Canopy Humidity alarm high is " + String(data));
       hasSentCanHumAlarm = 0;
-      hasSentNoAlarm = 0;
+      hasSentNoCanHumAlarm = 0;
       break;
 
     case TANK_TEMP_ALARM_MESSAGE_ID:
@@ -246,14 +244,14 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       tankTempAlarmLow = data;
       Serial.println("The low Temperture for the Tank alarm low is " + String(data));
       hasSentTankTempAlarm = 0;
-      hasSentNoAlarm = 0;
+      hasSentNoTankTempAlarm = 0;
       break;
 
     case TANK_TEMP_ALARM_HIGH_MESSAGE_ID:
       tankTempAlarmHigh = data;
       Serial.println("The high Temperture for the Tank alarm is = " + String(data));
       hasSentTankTempAlarm = 0;
-      hasSentNoAlarm = 0;
+      hasSentNoTankTempAlarm = 0;
       break;
 
     case SUMP_TEMP_ALARM_MESSAGE_ID:
@@ -265,12 +263,14 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
       sumpTempAlarmLow = data;
       Serial.println("The low Temperture for the sump alarm = " + String(data));
       hasSentSumpTempAlarm = 0;
-      hasSentNoAlarm = 0;
+      hasSentNoSumpTempAlarm = 0;
       break;
 
     case SUMP_TEMP_ALARM_HIGH_MESSAGE_ID:
       sumpTempAlarmHigh = data;
       Serial.println("The high Temperture for the Sump alarm = " + String(data));
+      hasSentSumpTempAlarm = 0;
+      hasSentNoSumpTempAlarm = 0;
       break;
 
     default:
@@ -284,10 +284,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
 void SendTempHumMessage(void *parameters)
 {
   while (1)
-  { /*
-     float CanopyTemp;
-     float CanopyHum;
-     */
+  { 
     canopyTemp = sht30D.readTemperature();
     canopyHum = sht30D.readHumidity();
 
@@ -310,7 +307,7 @@ void SendTempHumMessage(void *parameters)
     core.sendMessage(SUMP_TEMP_MESSAGE_ID, &SumpTemp); // Send the sump temperature
     delay(sendMessageDelay);
 
-    if (canopyTempAlarmOnOff == 0)
+    if (canopyTempAlarmOnOff == 1)
     {
       if (CanopyTemp >= canopyTempAlarmHigh || CanopyTemp <= canopyTempAlarmLow)
       {
@@ -343,7 +340,7 @@ void SendTempHumMessage(void *parameters)
       Serial.println("Canopy Humidity = " + String(CanopyHum));
 #endif
     }
-  } if (canopyHumidityAlarmOnOff == 0)
+  } if (canopyHumidityAlarmOnOff == 1)
     {
       if (CanopyHum >= canopyHumidityAlarmHigh || CanopyHum <= canopyHumidityAlarmLow)
       {
@@ -372,7 +369,7 @@ void SendTempHumMessage(void *parameters)
       }
     }
 
-    if (tankTempAlarmOnOff == 0)
+    if (tankTempAlarmOnOff == 1)
     {
       if (TankTemp >= tankTempAlarmHigh || TankTemp <= tankTempAlarmLow)
       {
@@ -389,7 +386,7 @@ void SendTempHumMessage(void *parameters)
       }
       else
       {
-        if (hasSentNoTankTempAlarm == 0)
+        if (hasSentNoTankTempAlarm == 1)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData0);
           delay(sendMessageDelay);
@@ -401,13 +398,13 @@ void SendTempHumMessage(void *parameters)
       }
     }
 
-    if (sumpTempAlarmOnOff == 0)
+    if (sumpTempAlarmOnOff == 1)
     {
       if (SumpTemp >= sumpTempAlarmHigh || SumpTemp <= sumpTempAlarmLow)
       {
         Serial.println("------------Send Sump Temp alarm triggered");
         Serial.println("Has sent alarm is = " + String(hasSentSumpTempAlarm));
-        if (hasSentAlarm == 0)
+        if (hasSentSumpTempAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           delay(sendMessageDelay);
