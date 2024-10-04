@@ -172,9 +172,9 @@ void loop()
   Serial.println("Tank Temperture Alarm = " + String(tankTempAlarmOnOff));
   Serial.println("Sump Temperture Alarm = " + String(sumpTempAlarmOnOff));
   /*
-   
 
-   
+
+
     */
 }
 
@@ -284,7 +284,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
 void SendTempHumMessage(void *parameters)
 {
   while (1)
-  { 
+  {
     canopyTemp = sht30D.readTemperature();
     canopyHum = sht30D.readHumidity();
 
@@ -332,15 +332,10 @@ void SendTempHumMessage(void *parameters)
           Serial.println("Canopy Temperture = " + String(CanopyTemp));
         }
       }
-
-#ifdef debuging
-      Serial.println("Sump Temperture = " + String(SumpTemp));
-      Serial.println("Tank Temperture = " + String(TankTemp));
-      Serial.println("Canopy Temperture = " + String(CanopyTemp));
-      Serial.println("Canopy Humidity = " + String(CanopyHum));
-#endif
     }
-  } if (canopyHumidityAlarmOnOff == 1)
+
+    Serial.println("Canopy Temperture canopyHumidityAlarmOnOff= " + String(canopyHumidityAlarmOnOff));
+    if (canopyHumidityAlarmOnOff == 1)
     {
       if (CanopyHum >= canopyHumidityAlarmHigh || CanopyHum <= canopyHumidityAlarmLow)
       {
@@ -427,6 +422,7 @@ void SendTempHumMessage(void *parameters)
         }
       }
     }
+  }
 }
 
 /***************************************************
