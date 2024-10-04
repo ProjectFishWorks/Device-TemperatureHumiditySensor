@@ -311,14 +311,14 @@ void SendTempHumMessage(void *parameters)
     {
       if (CanopyTemp >= canopyTempAlarmHigh || CanopyTemp <= canopyTempAlarmLow)
       {
-        Serial.println("------------SendTempHumMessage triggered");
+        Serial.println("------------Canopy Temp Message triggered");
         Serial.println("Has sent alarm is = " + String(hasSentCanTempAlarm));
         if (hasSentCanTempAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           hasSentCanTempAlarm = 1;
           hasSentNoCanTempAlarm = 0;
-          Serial.println("-----------Not has sent Alarm  = " + String(hasSentCanTempAlarm));
+          Serial.println("-----------Not Can Temp Alarm  = " + String(hasSentCanTempAlarm));
         }
       }
       else
@@ -345,14 +345,14 @@ void SendTempHumMessage(void *parameters)
       if (CanopyHum >= canopyHumidityAlarmHigh || CanopyHum <= canopyHumidityAlarmLow)
       {
         Serial.println("------------Send Canopy Humidity alarm triggered");
-        Serial.println("Has sent alarm is = " + String(hasSentCanHumAlarm));
+        Serial.println("Has sent Can Hum alarm is = " + String(hasSentCanHumAlarm));
         if (hasSentCanHumAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           delay(sendMessageDelay);
           hasSentCanHumAlarm = 1;
           hasSentNoCanHumAlarm = 0;
-          Serial.println("-----------Not has sent Alarm  = " + String(hasSentCanHumAlarm));
+          Serial.println("-----------Not has sent Can Hum Alarm  = " + String(hasSentCanHumAlarm));
         }
       }
       else
@@ -374,14 +374,14 @@ void SendTempHumMessage(void *parameters)
       if (TankTemp >= tankTempAlarmHigh || TankTemp <= tankTempAlarmLow)
       {
         Serial.println("------------Send Tank Temp alarm triggered");
-        Serial.println("Has sent alarm is = " + String(hasSentTankTempAlarm));
+        Serial.println("Has sent Tank Temp Alarm is = " + String(hasSentTankTempAlarm));
         if (hasSentTankTempAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           delay(sendMessageDelay);
           hasSentTankTempAlarm = 1;
           hasSentNoTankTempAlarm = 0;
-          Serial.println("-----------Not has sent Alarm  = " + String(hasSentTankTempAlarm));
+          Serial.println("----------- Has Not sent Tank Temp Alarm  = " + String(hasSentTankTempAlarm));
         }
       }
       else
@@ -400,17 +400,18 @@ void SendTempHumMessage(void *parameters)
 
     if (sumpTempAlarmOnOff == 1)
     {
+      Serial.println("If Sump Temperture = " + String(SumpTemp));
       if (SumpTemp >= sumpTempAlarmHigh || SumpTemp <= sumpTempAlarmLow)
       {
         Serial.println("------------Send Sump Temp alarm triggered");
-        Serial.println("Has sent alarm is = " + String(hasSentSumpTempAlarm));
+        Serial.println("Has sent Sump Temp alarm is = " + String(hasSentSumpTempAlarm));
         if (hasSentSumpTempAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           delay(sendMessageDelay);
           hasSentSumpTempAlarm = 1;
           hasSentNoSumpTempAlarm = 0;
-          Serial.println("-----------Not has sent Alarm  = " + String(hasSentSumpTempAlarm));
+          Serial.println("----------- Has not sent Sump Temp Alarm  = " + String(hasSentSumpTempAlarm));
         }
       }
       else
@@ -421,8 +422,8 @@ void SendTempHumMessage(void *parameters)
           delay(sendMessageDelay);
           hasSentSumpTempAlarm = 0;
           hasSentNoSumpTempAlarm = 1;
-          Serial.println("Sump Temperture no alarm");
-          Serial.println("Sump Temperture = " + String(SumpTemp));
+          Serial.println("Else Sump Temperture no alarm");
+          Serial.println("Else Sump Temperture = " + String(SumpTemp));
         }
       }
     }
