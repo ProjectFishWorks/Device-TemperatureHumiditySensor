@@ -11,8 +11,8 @@
 // #define displayMSG
 // #define debuging
 
-#define messageGap 5000       // 2 seconds
-#define sendMessageDelay 1000 // 1/10 second
+#define messageGap 10000       // 2 seconds
+#define sendMessageDelay 2000 // 1/10 second
 
 // USE int FOR I2C PIN DEFINITIONS
 int I2C_SDA = 3;
@@ -41,33 +41,33 @@ NodeControllerCore core;
 #define CANOPY_TEMP_ALARM_MESSAGE_ID 2561 // ID in hex is 0x1001
 bool canopyTempAlarmOnOff;
 #define CANOPY_TEMP_ALARM_LOW_MESSAGE_ID 2562 // ID in hex is 0x1002
-int canopyTempAlarmLow = 16;
+int canopyTempAlarmLow;
 #define CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID 2563 // ID in hex is 0x1003
-int canopyTempAlarmHigh = 22;
+int canopyTempAlarmHigh;
 
 #define CANOPY_HUMIDITY_MESSAGE_ID 2564       // ID in hex is 0x1004
 #define CANOPY_HUMIDITY_ALARM_MESSAGE_ID 2565 // ID in hex is 0x1005
 bool canopyHumidityAlarmOnOff;
 #define CANOPY_HUMIDITY_ALARM_LOW_MESSAGE_ID 2566 // ID in hex is 0x1006
-int canopyHumidityAlarmLow = 10;
+int canopyHumidityAlarmLow;
 #define CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID 2567 // ID in hex is 0x1007
-int canopyHumidityAlarmHigh = 100;
+int canopyHumidityAlarmHigh;
 
 #define TANK_TEMP_MESSAGE_ID 2568       // ID in hex is 0x1008
 #define TANK_TEMP_ALARM_MESSAGE_ID 2569 // ID in hex is 0x1009
 bool tankTempAlarmOnOff;
 #define TANK_TEMP_ALARM_LOW_MESSAGE_ID 2570 // ID in hex is 0x100A
-int tankTempAlarmLow = 10;
+int tankTempAlarmLow;
 #define TANK_TEMP_ALARM_HIGH_MESSAGE_ID 2571 // ID in hex is 0x100B
-int tankTempAlarmHigh = 30;
+int tankTempAlarmHigh;
 
 #define SUMP_TEMP_MESSAGE_ID 2572       // ID in hex is 0x100C
 #define SUMP_TEMP_ALARM_MESSAGE_ID 2573 // ID in hex is 0x100D
 bool sumpTempAlarmOnOff;
 #define SUMP_TEMP_ALARM_LOW_MESSAGE_ID 2574 // ID in hex is 0x100E
-int sumpTempAlarmLow = 10;
+int sumpTempAlarmLow;
 #define SUMP_TEMP_ALARM_HIGH_MESSAGE_ID 2575 // ID in hex is 0x100F
-int sumpTempAlarmHigh = 30;
+int sumpTempAlarmHigh;
 
 #define ALARM_MESSAGE_ID 901 // ID in hex is 0x385
 
@@ -84,14 +84,14 @@ uint64_t errorData0 = 0;
 
 // ------------------------------  Variables for the temperature and humidity values to be stored in  ------------------------------
 
-float canopyTemp = 0;
-float CanopyTemp = 0;
-float canopyHum = 0;
-float CanopyHum = 0;
-float tankTemp = 0;
-float TankTemp = 0;
-float sumpTemp = 0;
-float SumpTemp = 0;
+float canopyTemp;
+float CanopyTemp;
+float canopyHum;
+float CanopyHum;
+float tankTemp;
+float TankTemp;
+float sumpTemp;
+float SumpTemp;
 int tankThermometer = 0;
 int sumpThermometer = 1;
 
@@ -296,7 +296,10 @@ void SendTempHumMessage(void *parameters)
 
     CanopyTemp = canopyTemp;
     CanopyHum = canopyHum;
+    if(CanopyTemp > -250)
+    {
     core.sendMessage(CANOPY_TEMP_MESSAGE_ID, &CanopyTemp); // Send the Canopy temperature
+    }
     delay(sendMessageDelay);
     core.sendMessage(CANOPY_HUMIDITY_MESSAGE_ID, &CanopyHum); // Send the Canopy humidity
     delay(sendMessageDelay);
