@@ -12,7 +12,7 @@
 // #define debuging
 
 #define messageGap 10000       // 2 seconds
-#define sendMessageDelay 2000 // 1/10 second
+#define sendMessageDelay 0 // 1/10 second
 
 // USE int FOR I2C PIN DEFINITIONS
 int I2C_SDA = 3;
