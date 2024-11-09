@@ -41,33 +41,33 @@ NodeControllerCore core;
 #define CANOPY_TEMP_ALARM_MESSAGE_ID 2561 // ID in hex is 0x1001
 bool canopyTempAlarmOnOff;
 #define CANOPY_TEMP_ALARM_LOW_MESSAGE_ID 2562 // ID in hex is 0x1002
-int canopyTempAlarmLow;
+int canopyTempAlarmLow = 0;
 #define CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID 2563 // ID in hex is 0x1003
-int canopyTempAlarmHigh;
+int canopyTempAlarmHigh = 100;
 
 #define CANOPY_HUMIDITY_MESSAGE_ID 2564       // ID in hex is 0x1004
 #define CANOPY_HUMIDITY_ALARM_MESSAGE_ID 2565 // ID in hex is 0x1005
 bool canopyHumidityAlarmOnOff;
 #define CANOPY_HUMIDITY_ALARM_LOW_MESSAGE_ID 2566 // ID in hex is 0x1006
-int canopyHumidityAlarmLow;
+int canopyHumidityAlarmLow = 0;
 #define CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID 2567 // ID in hex is 0x1007
-int canopyHumidityAlarmHigh;
+int canopyHumidityAlarmHigh = 100;
 
 #define TANK_TEMP_MESSAGE_ID 2568       // ID in hex is 0x1008
 #define TANK_TEMP_ALARM_MESSAGE_ID 2569 // ID in hex is 0x1009
 bool tankTempAlarmOnOff;
 #define TANK_TEMP_ALARM_LOW_MESSAGE_ID 2570 // ID in hex is 0x100A
-int tankTempAlarmLow;
+int tankTempAlarmLow = 0;
 #define TANK_TEMP_ALARM_HIGH_MESSAGE_ID 2571 // ID in hex is 0x100B
-int tankTempAlarmHigh;
+int tankTempAlarmHigh =100;
 
 #define SUMP_TEMP_MESSAGE_ID 2572       // ID in hex is 0x100C
 #define SUMP_TEMP_ALARM_MESSAGE_ID 2573 // ID in hex is 0x100D
 bool sumpTempAlarmOnOff;
 #define SUMP_TEMP_ALARM_LOW_MESSAGE_ID 2574 // ID in hex is 0x100E
-int sumpTempAlarmLow;
+int sumpTempAlarmLow = 0;
 #define SUMP_TEMP_ALARM_HIGH_MESSAGE_ID 2575 // ID in hex is 0x100F
-int sumpTempAlarmHigh;
+int sumpTempAlarmHigh = 100;
 
 #define ALARM_MESSAGE_ID 901 // ID in hex is 0x385
 
@@ -122,7 +122,7 @@ void setup()
     Serial.println("Failed to initialize driver");
   }
 
-  // Initialize the OneWire communication
+  // Initialize the I2C communication
   Wire.begin(I2C_SDA, I2C_SCL);
 
   // Initialize the DS18B20 temperature sensors
