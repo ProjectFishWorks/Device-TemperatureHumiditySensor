@@ -5,6 +5,9 @@ A device that montitors water and air temperature and humidity. The has connecti
 
 The two water temperature probes are DS18B20. The ambient sensor is a SHT30.
 
+![alt text](Pictures/TempHumNode.jpg)
+
+![alt text](Pictures/TempProbe.jpg)
 
 ## Firmware
 
