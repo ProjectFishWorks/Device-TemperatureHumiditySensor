@@ -9,6 +9,8 @@ The two water temperature probes are DS18B20. The ambient sensor is a SHT30.
 
 ![alt text](Pictures/TempProbe.jpg)
 
+![alt text](Pictures/Schematic.jpg)
+
 ## Firmware
 
 ### Message IDs and Format
