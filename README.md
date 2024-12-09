@@ -1,5 +1,5 @@
 # Device-TemperatureHumiditySensor
-A device that montitors water and air temperature and humidity. The has connections for two water temperature probes. Also it contains ambient air and humidity sensor located in the node enclosure.
+A device that monitors water and air temperature and humidity. The has connections for two water temperature probes. Also it contains ambient air and humidity sensor located in the node enclosure.
 
 ## Hardware
 
