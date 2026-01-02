@@ -8,11 +8,10 @@
 
 // ---------------------------------------------------------put global variables here:---------------------------------------------------------
 
-// #define displayMSG
-// #define debuging
+// #define debuging // Comment out to remove debug messages
 
-#define messageGap 10000       // 2 seconds
-#define sendMessageDelay 0 // 1/10 second
+#define messageGap 5000       // 5 seconds
+#define sendMessageDelay 1000 // 1/10 second
 
 // USE int FOR I2C PIN DEFINITIONS
 int I2C_SDA = 3;
@@ -59,7 +58,7 @@ bool tankTempAlarmOnOff;
 #define TANK_TEMP_ALARM_LOW_MESSAGE_ID 2570 // ID in hex is 0x100A
 int tankTempAlarmLow = 0;
 #define TANK_TEMP_ALARM_HIGH_MESSAGE_ID 2571 // ID in hex is 0x100B
-int tankTempAlarmHigh =100;
+int tankTempAlarmHigh = 100;
 
 #define SUMP_TEMP_MESSAGE_ID 2572       // ID in hex is 0x100C
 #define SUMP_TEMP_ALARM_MESSAGE_ID 2573 // ID in hex is 0x100D
@@ -100,11 +99,8 @@ int sumpThermometer = 1;
 // What to do with received messages from the CAN bus
 void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data);
 
+// Task to send temperature and humidity messages
 void SendTempHumMessage(void *parameters);
-
-void chkTempHum();
-
-void chkWaterTempSensors();
 
 //------------------------------------------------------- put your setup code here, to run once:------------------------------------------------------
 void setup()
@@ -150,32 +146,21 @@ void setup()
   WaterTempSensors.requestTemperatures();
   tankTemp = WaterTempSensors.getTempCByIndex(tankThermometer);
   sumpTemp = WaterTempSensors.getTempCByIndex(sumpThermometer);
+  delay(messageGap);
+
 #ifdef debuging
   Serial.println("Canopy Temperture = " + String(canopyTemp));
   Serial.println("Canopy Humidity = " + String(canopyHum));
   Serial.println("Tank Temperture = " + String(tankTemp));
   Serial.println("Sump Temperture = " + String(sumpTemp));
+  Serial.println("End of setup");
+  Serial.println("");
 #endif
-  delay(messageGap);
 }
 
 //---------------------------------------------------- put your main code here, to run repeatedly:----------------------------------------------------
 void loop()
 {
-
-  chkWaterTempSensors();
-
-  chkTempHum();
-
-  Serial.println("Canopy Temperture Alarm = " + String(canopyTempAlarmOnOff));
-  Serial.println("Canopy Humidity Alarm = " + String(canopyHumidityAlarmOnOff));
-  Serial.println("Tank Temperture Alarm = " + String(tankTempAlarmOnOff));
-  Serial.println("Sump Temperture Alarm = " + String(sumpTempAlarmOnOff));
-  /*
-
-
-
-    */
 }
 
 //--------------------------------------------------------- put function definitions here: ---------------------------------------------------------
@@ -183,8 +168,11 @@ void loop()
 // Callback function for received messages from the CAN bus
 void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
 {
-#ifdef displayMSG
+#ifdef debuging
   Serial.println("Message received callback");
+  Serial.println("Node ID: " + String(nodeID, HEX));
+  Serial.println("Message ID: " + String(messageID, HEX));
+  Serial.println("Data: " + String(data));
 #endif
 
   // Check if the message is for this node
@@ -193,84 +181,132 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
 #ifdef displayMSG
     Serial.println("Message received to self");
 #endif
-    // Check the message ID for the LED control messages
+
+// Handle the message based on its ID
     switch (messageID)
     {
-      // ---------------------Demo override control messages-------------------------
     case CANOPY_TEMP_ALARM_MESSAGE_ID:
       canopyTempAlarmOnOff = data;
+#ifdef debuging
       Serial.println("Canopy Temperture alarm is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case CANOPY_TEMP_ALARM_LOW_MESSAGE_ID:
       canopyTempAlarmLow = data;
-      Serial.println("Canopy Temperture alarm low is " + String(data));
       hasSentCanTempAlarm = 0;
       hasSentNoCanTempAlarm = 0;
+#ifdef debuging
+      Serial.println("Canopy Temperture alarm low is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case CANOPY_TEMP_ALARM_HIGH_MESSAGE_ID:
       canopyTempAlarmHigh = data;
-      Serial.println("Canopy Temperture alarm high is " + String(data));
       hasSentCanTempAlarm = 0;
       hasSentNoCanTempAlarm = 0;
+#ifdef debuging
+      Serial.println("Canopy Temperture alarm high is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case CANOPY_HUMIDITY_ALARM_MESSAGE_ID:
       canopyHumidityAlarmOnOff = data;
+#ifdef debuging
       Serial.println("Canopy Humidity alarm is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case CANOPY_HUMIDITY_ALARM_LOW_MESSAGE_ID:
       canopyHumidityAlarmLow = data;
-      Serial.println("Canopy Humidity alarm low is " + String(data));
       hasSentCanHumAlarm = 0;
       hasSentNoCanHumAlarm = 0;
+#ifdef debuging
+      Serial.println("Canopy Humidity alarm low is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case CANOPY_HUMIDITY_ALARM_HIGH_MESSAGE_ID:
       canopyHumidityAlarmHigh = data;
-      Serial.println("Canopy Humidity alarm high is " + String(data));
       hasSentCanHumAlarm = 0;
       hasSentNoCanHumAlarm = 0;
+#ifdef debuging
+      Serial.println("Canopy Humidity alarm high is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case TANK_TEMP_ALARM_MESSAGE_ID:
       tankTempAlarmOnOff = data;
+#ifdef debuging
       Serial.println("Tank Temperture alarm is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case TANK_TEMP_ALARM_LOW_MESSAGE_ID:
       tankTempAlarmLow = data;
-      Serial.println("The low Temperture for the Tank alarm low is " + String(data));
       hasSentTankTempAlarm = 0;
       hasSentNoTankTempAlarm = 0;
+#ifdef debuging
+      Serial.println("The low Temperture for the Tank alarm low is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case TANK_TEMP_ALARM_HIGH_MESSAGE_ID:
       tankTempAlarmHigh = data;
-      Serial.println("The high Temperture for the Tank alarm is = " + String(data));
       hasSentTankTempAlarm = 0;
       hasSentNoTankTempAlarm = 0;
+#ifdef debuging
+      Serial.println("The high Temperture for the Tank alarm is = " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case SUMP_TEMP_ALARM_MESSAGE_ID:
       sumpTempAlarmOnOff = data;
+#ifdef debuging
       Serial.println("Sump Temperture alarm is " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case SUMP_TEMP_ALARM_LOW_MESSAGE_ID:
       sumpTempAlarmLow = data;
-      Serial.println("The low Temperture for the sump alarm = " + String(data));
       hasSentSumpTempAlarm = 0;
       hasSentNoSumpTempAlarm = 0;
+#ifdef debuging
+      Serial.println("The low Temperture for the sump alarm = " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     case SUMP_TEMP_ALARM_HIGH_MESSAGE_ID:
       sumpTempAlarmHigh = data;
-      Serial.println("The high Temperture for the Sump alarm = " + String(data));
       hasSentSumpTempAlarm = 0;
       hasSentNoSumpTempAlarm = 0;
+#ifdef debuging
+      Serial.println("The high Temperture for the Sump alarm = " + String(data));
+      Serial.println("");
+      delay(messageGap);
+#endif
       break;
 
     default:
@@ -279,8 +315,7 @@ void receive_message(uint8_t nodeID, uint16_t messageID, uint64_t data)
   }
 }
 
-//--------------------------------------
-
+// Task to send temperature and humidity messages
 void SendTempHumMessage(void *parameters)
 {
   while (1)
@@ -291,14 +326,25 @@ void SendTempHumMessage(void *parameters)
     WaterTempSensors.requestTemperatures();
     tankTemp = WaterTempSensors.getTempCByIndex(tankThermometer);
     sumpTemp = WaterTempSensors.getTempCByIndex(sumpThermometer);
+    core.sendMessage(SUMP_TEMP_MESSAGE_ID, &SumpTemp); // Send the sump temperature
+
+#ifdef debuging
+    Serial.println("\nRunning SendTempHumMessage Task\n");
+    Serial.println("Canopy Temperture = " + String(canopyTemp));
+    Serial.println("Canopy Humidity = " + String(canopyHum));
+    Serial.println("Tank Temperture = " + String(tankTemp));
+    Serial.println("Sump Temperture = " + String(sumpTemp));
+    Serial.println("");
+    delay(messageGap);
+#endif
 
     delay(messageGap);
 
     CanopyTemp = canopyTemp;
     CanopyHum = canopyHum;
-    if(CanopyTemp > -250)
+    if (CanopyTemp > -250)
     {
-    core.sendMessage(CANOPY_TEMP_MESSAGE_ID, &CanopyTemp); // Send the Canopy temperature
+      core.sendMessage(CANOPY_TEMP_MESSAGE_ID, &CanopyTemp); // Send the Canopy temperature
     }
     delay(sendMessageDelay);
     core.sendMessage(CANOPY_HUMIDITY_MESSAGE_ID, &CanopyHum); // Send the Canopy humidity
@@ -314,14 +360,22 @@ void SendTempHumMessage(void *parameters)
     {
       if (CanopyTemp >= canopyTempAlarmHigh || CanopyTemp <= canopyTempAlarmLow)
       {
-        Serial.println("------------Canopy Temp Message triggered");
+#ifdef debuging
+        Serial.println("\n------------Canopy Temp Message triggered");
         Serial.println("Has sent alarm is = " + String(hasSentCanTempAlarm));
+        Serial.println("");
+#endif
+
         if (hasSentCanTempAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           hasSentCanTempAlarm = 1;
           hasSentNoCanTempAlarm = 0;
+
+#ifdef debuging
           Serial.println("-----------Not Can Temp Alarm  = " + String(hasSentCanTempAlarm));
+          Serial.println("");
+#endif
         }
       }
       else
@@ -331,26 +385,47 @@ void SendTempHumMessage(void *parameters)
           core.sendMessage(ALARM_MESSAGE_ID, &errorData0);
           hasSentCanTempAlarm = 0;
           hasSentNoCanTempAlarm = 1;
+
+#ifdef debuging
           Serial.println("Canopy Temperture no alarm");
           Serial.println("Canopy Temperture = " + String(CanopyTemp));
+          Serial.println("");
+          delay(messageGap);
+#endif
         }
       }
     }
 
+#ifdef debuging
     Serial.println("Canopy Temperture canopyHumidityAlarmOnOff= " + String(canopyHumidityAlarmOnOff));
+    Serial.println("");
+    delay(messageGap);
+#endif
+
     if (canopyHumidityAlarmOnOff == 1)
     {
       if (CanopyHum >= canopyHumidityAlarmHigh || CanopyHum <= canopyHumidityAlarmLow)
       {
+
+#ifdef debuging
         Serial.println("------------Send Canopy Humidity alarm triggered");
         Serial.println("Has sent Can Hum alarm is = " + String(hasSentCanHumAlarm));
+        Serial.println("");
+        delay(messageGap);
+#endif
+
         if (hasSentCanHumAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           delay(sendMessageDelay);
           hasSentCanHumAlarm = 1;
           hasSentNoCanHumAlarm = 0;
+
+#ifdef debuging
           Serial.println("-----------Not has sent Can Hum Alarm  = " + String(hasSentCanHumAlarm));
+          Serial.println("");
+          delay(messageGap);
+#endif
         }
       }
       else
@@ -361,8 +436,13 @@ void SendTempHumMessage(void *parameters)
           delay(sendMessageDelay);
           hasSentCanHumAlarm = 0;
           hasSentNoCanHumAlarm = 1;
+
+#ifdef debuging
           Serial.println("Canopy Humidity no alarm");
           Serial.println("Canopy Humidity = " + String(CanopyHum));
+          Serial.println("");
+          delay(messageGap);
+#endif
         }
       }
     }
@@ -371,15 +451,26 @@ void SendTempHumMessage(void *parameters)
     {
       if (TankTemp >= tankTempAlarmHigh || TankTemp <= tankTempAlarmLow)
       {
+
+#ifdef debuging
         Serial.println("------------Send Tank Temp alarm triggered");
         Serial.println("Has sent Tank Temp Alarm is = " + String(hasSentTankTempAlarm));
+        Serial.println("");
+        delay(messageGap);
+#endif
+
         if (hasSentTankTempAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           delay(sendMessageDelay);
           hasSentTankTempAlarm = 1;
           hasSentNoTankTempAlarm = 0;
+
+#ifdef debuging
           Serial.println("----------- Has Not sent Tank Temp Alarm  = " + String(hasSentTankTempAlarm));
+          Serial.println("");
+          delay(messageGap);
+#endif
         }
       }
       else
@@ -390,26 +481,46 @@ void SendTempHumMessage(void *parameters)
           delay(sendMessageDelay);
           hasSentTankTempAlarm = 0;
           hasSentNoTankTempAlarm = 1;
+
+#ifdef debuging
           Serial.println("Tank Temperture no alarm");
           Serial.println("Tank Temperture = " + String(TankTemp));
+          Serial.println("");
+          delay(messageGap);
+#endif
         }
       }
     }
 
     if (sumpTempAlarmOnOff == 1)
     {
+
+#ifdef debuging
       Serial.println("If Sump Temperture = " + String(SumpTemp));
+      Serial.println("");
+      delay(messageGap);
+#endif
+
       if (SumpTemp >= sumpTempAlarmHigh || SumpTemp <= sumpTempAlarmLow)
       {
+#ifdef debuging
         Serial.println("------------Send Sump Temp alarm triggered");
         Serial.println("Has sent Sump Temp alarm is = " + String(hasSentSumpTempAlarm));
+        Serial.println("");
+        delay(messageGap);
+#endif
         if (hasSentSumpTempAlarm == 0)
         {
           core.sendMessage(ALARM_MESSAGE_ID, &errorData1);
           delay(sendMessageDelay);
           hasSentSumpTempAlarm = 1;
           hasSentNoSumpTempAlarm = 0;
+
+#ifdef debuging
           Serial.println("----------- Has not sent Sump Temp Alarm  = " + String(hasSentSumpTempAlarm));
+          Serial.println("");
+          delay(messageGap);
+#endif
         }
       }
       else
@@ -420,83 +531,15 @@ void SendTempHumMessage(void *parameters)
           delay(sendMessageDelay);
           hasSentSumpTempAlarm = 0;
           hasSentNoSumpTempAlarm = 1;
+
+#ifdef debuging
           Serial.println("Else Sump Temperture no alarm");
           Serial.println("Else Sump Temperture = " + String(SumpTemp));
+          Serial.println("");
+          delay(messageGap);
+#endif
         }
       }
     }
   }
-}
-
-/***************************************************
-  This is an example for the SHT31-D Humidity & Temp Sensor
-
-  Designed specifically to work with the SHT31-D sensor from Adafruit
-  ----> https://www.adafruit.com/products/2857
-
-  These WaterTempSensors use I2C to communicate, 2 pins are required to
-  interface
- ****************************************************/
-
-void chkTempHum()
-{
-  canopyTemp = sht30D.readTemperature();
-  canopyHum = sht30D.readHumidity();
-
-#ifdef debuging
-  if (!isnan(canopyTemp)) // check if 'is not a number'
-  {
-    Serial.print("Canopy Temp      = ");
-    Serial.print(canopyTemp);
-    Serial.println("°c");
-    Serial.print("");
-  }
-  else
-  {
-    Serial.println("Failed to read temperature");
-    Serial.print("");
-  }
-
-  if (!isnan(canopyHum)) // check if 'is not a number'
-  {
-    Serial.print("Canopy Humidity  = ");
-    Serial.print(canopyHum);
-    Serial.println("%");
-    Serial.print("");
-  }
-  else
-  {
-    Serial.println("Failed to read humidity");
-    Serial.print("");
-  }
-#endif
-}
-
-/*
-//--------------------------------------------------------- Water Temperature Sensor ---------------------------------------------------------
-/*********
-  Rui Santos
-  Complete project details at https://randomnerdtutorials.com
-  Based on the Dallas Temperature Library example
-*********/
-
-void chkWaterTempSensors()
-{
-  // Call WaterTempSensors.requestTemperatures() to issue a global temperature and Requests to all devices on the bus
-  WaterTempSensors.requestTemperatures();
-
-  // Why "byIndex"? You can have more than one IC on the same bus. 0 refers to the first IC on the wire
-  tankTemp = WaterTempSensors.getTempCByIndex(tankThermometer);
-  sumpTemp = WaterTempSensors.getTempCByIndex(sumpThermometer);
-
-#ifdef debuging
-  Serial.print("Tank Temperature = ");
-  Serial.print(tankTemp);
-  Serial.println("°c");
-  Serial.print("Sump Temperature = ");
-  Serial.print(sumpTemp);
-  Serial.println("°c");
-#endif
-
-  delay(messageGap);
 }
